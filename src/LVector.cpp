@@ -92,7 +92,7 @@ LVector LVector::rotate(float angle, const LVector& origin) const {
 }
 
 std::ostream& operator<<(std::ostream& os, const LVector& info) {
-	os << "( " << info.x << ", " << info.y << " )";
+	os << "{ " << info.x << ", " << info.y << " }";
 	return os;
 }
 

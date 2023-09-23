@@ -32,4 +32,6 @@ class LCircle : public LShape {
 	virtual void Display() const;
 };
 
+std::ostream& operator<<(std::ostream& os, const LCircle& info);
+
 #endif	// LCIRCLE_HPP

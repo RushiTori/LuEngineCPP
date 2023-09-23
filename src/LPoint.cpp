@@ -58,3 +58,8 @@ bool LPoint::CheckCollision(const LPoly& other) const {
 }
 
 void LPoint::Display() const { this->skin.DisplayCircle(this->pos, 0.1, this->col); }
+
+std::ostream& operator<<(std::ostream& os, const LPoint& info) {
+	os << "{ " << info.pos << ", " << info.col << " }";
+	return os;
+}

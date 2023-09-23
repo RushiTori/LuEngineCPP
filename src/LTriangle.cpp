@@ -70,3 +70,8 @@ bool LTriangle::CheckCollision(const LPoly& other) const {
 }
 
 void LTriangle::Display() const { this->skin.DisplayTriangle(this->pA, this->pB, this->pC, this->col); }
+
+std::ostream& operator<<(std::ostream& os, const LTriangle& info) {
+	os << "{ " << info.pA << ", " << info.pB << ", " << info.pC << ", " << info.col << " }";
+	return os;
+}

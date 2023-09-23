@@ -30,4 +30,6 @@ class LTriangle : public LShape {
 	virtual void Display() const;
 };
 
+std::ostream& operator<<(std::ostream& os, const LTriangle& info);
+
 #endif	// LTRIANGLE_HPP

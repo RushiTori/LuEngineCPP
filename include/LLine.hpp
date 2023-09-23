@@ -31,4 +31,6 @@ class LLine : public LShape {
 	virtual void Display() const;
 };
 
+std::ostream& operator<<(std::ostream& os, const LLine& info);
+
 #endif	// LLINE_HPP

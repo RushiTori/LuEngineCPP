@@ -31,4 +31,6 @@ class LPoly : public LShape {
 	virtual void Display() const;
 };
 
+std::ostream& operator<<(std::ostream& os, const LPoly& info);
+
 #endif	// LPOLY_HPP

@@ -32,4 +32,6 @@ class LPoint : public LShape {
 	virtual void Display() const;
 };
 
+std::ostream& operator<<(std::ostream& os, const LPoint& info);
+
 #endif	// LPOINT_HPP

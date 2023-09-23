@@ -54,3 +54,8 @@ bool LCircle::CheckCollision(const LPoly& other) const {
 }
 
 void LCircle::Display() const { this->skin.DisplayCircle(this->pos, this->r, this->col); }
+
+std::ostream& operator<<(std::ostream& os, const LCircle& info) {
+	os << "{ " << info.pos << ", " << info.r << ", " << info.col << " }";
+	return os;
+}

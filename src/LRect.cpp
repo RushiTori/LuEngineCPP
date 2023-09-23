@@ -59,8 +59,13 @@ bool LRect::CheckCollision(const LPoly& other) const {
 		if (this->CheckCollision(LLine(other.points[i], other.points[j]))) return true;
 		if (this->CheckCollision(other.points[i])) return true;
 	}
-	
+
 	return false;
 }
 
 void LRect::Display() const { this->skin.DisplayRect(*this, this->col); }
+
+std::ostream& operator<<(std::ostream& os, const LRect& info) {
+	os << "{ " << info.x << ", " << info.y << ", " << info.w << ", " << info.h << ", " << info.col << " }";
+	return os;
+}

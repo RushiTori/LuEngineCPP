@@ -98,3 +98,13 @@ bool LPoly::CheckCollision(const LPoly& other) const {
 }
 
 void LPoly::Display() const { this->skin.DisplayPoly(this->points, this->col); }
+
+std::ostream& operator<<(std::ostream& os, const LPoly& info) {
+	os << "{ " << info.points.size() << " : { ";
+	for (uint i = 0; i < info.points.size(); i++) {
+		os << info.points[i];
+		if (i < info.points.size() - 1) os << ", ";
+	}
+	os << " }, " << info.col << " }" << std::endl;
+	return os;
+}

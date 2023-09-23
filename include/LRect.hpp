@@ -34,4 +34,6 @@ class LRect : public LShape {
 	virtual void Display() const;
 };
 
+std::ostream& operator<<(std::ostream& os, const LRect& info);
+
 #endif	// LRECT_HPP

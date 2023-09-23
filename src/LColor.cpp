@@ -75,7 +75,7 @@ float LColor::brightness() const { return std::max(std::max(r, g), b) / 255.0f; 
 LColor LColor::transparent(uchar newAlpha) const { return LColor(r, g, b, (newAlpha == 255) ? (a / 2) : newAlpha); }
 
 std::ostream& operator<<(std::ostream& os, const LColor& info) {
-	os << "( " << int(info.r) << ", " << int(info.g) << ", " << int(info.b) << ", " << int(info.a) << " )";
+	os << "{ " << int(info.r) << ", " << int(info.g) << ", " << int(info.b) << ", " << int(info.a) << " }";
 	return os;
 }
 
