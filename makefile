@@ -75,7 +75,7 @@ ifeq ($(USED_OS), Linux)
 
 	@mkdir -p $(STATIC_H_PATH)/
 	@echo Installing the headers at $(STATIC_H_PATH)/
-	@cp --update LuEngine.h $(STATIC_PATH)/include/LuEngine.h
+	@cp --update LuEngine.hpp $(STATIC_PATH)/include/LuEngine.hpp
 	@$(MAKE) --silent installHeaders
 
 else ifeq ($(USED_OS), Windows)
@@ -95,7 +95,7 @@ endif
 
 
 installHeaders: $(patsubst $(INC_DIR)/%, $(STATIC_H_PATH)/%, $(INC_FILES))
-$(STATIC_H_PATH)/%.h: $(INC_DIR)/%.h
+$(STATIC_H_PATH)/%.hpp: $(INC_DIR)/%.hpp
 	@echo installing $(patsubst %.o, %,$(notdir $@))
 	@cp --update $< $@
 

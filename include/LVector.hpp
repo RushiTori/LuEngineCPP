@@ -14,13 +14,7 @@ struct LVector {
 	// All the constructors and static functions
 	LVector(float x_ = 0, float y_ = 0): x(x_), y(y_) {}
 
-	/*LVector(const LVector& other) : x(other.x), y(other.y) {}
-
-	constexpr LVector& operator=(const LVector& other) {
-		this->x = other.x;
-		this->y = other.y;
-		return *this;
-	}*/
+	LVector(const LVector& other) = default;
 
 	static LVector fromAngle(float angle, float mag);
 	static float dot(const LVector& vecA, const LVector& vecB);

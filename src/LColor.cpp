@@ -1,9 +1,5 @@
 #include "LColor.hpp"
 
-LColor::LColor(const LColor& other) : r(other.r), g(other.g), b(other.b), a(other.a) {}
-
-LColor::LColor(uchar r_, uchar g_, uchar b_, uchar a_) : r(r_), g(g_), b(b_), a(a_) {}
-
 LColor LColor::fromHSB(float hue, float saturation, float brightness, uchar alpha) {
 	if (hue < 0) {
 		hue = 0 + (hue - std::floor(hue));

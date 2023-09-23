@@ -61,18 +61,18 @@ class TextBox {
 	static const string ALL_SYMBOLS;
 };
 
-const string TextBox::ASCII_PRINTABLES =
+inline const string TextBox::ASCII_PRINTABLES =
 	"!\"#$%&\'()*+,-./0123456789:.<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
-const string TextBox::LOWERCASE_ALPHABET = " abcdefghijklmnopqrstuvwxyz";
-const string TextBox::UPPERCASE_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-const string TextBox::WHOLE_ALPHABET = TextBox::LOWERCASE_ALPHABET + TextBox::UPPERCASE_ALPHABET;
+inline const string TextBox::LOWERCASE_ALPHABET = " abcdefghijklmnopqrstuvwxyz";
+inline const string TextBox::UPPERCASE_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+inline const string TextBox::WHOLE_ALPHABET = TextBox::LOWERCASE_ALPHABET + TextBox::UPPERCASE_ALPHABET;
 
-const string TextBox::DIGITS = " 0123456789";
-const string TextBox::ONLY_DIGITS = "0123456789";
-const string TextBox::MATH_SYMBOLS = " ()+-/*^%.,\'";		   // character '\'' is there as a digit separator
-const string TextBox::MATHEXPR_SYMBOLS = " <=>~()+-/*^%.,\'";  // character '\'' is there as a digit separator
-const string TextBox::TEXT_SYMBOLS = " ,:;.?!-()\"\'`";
-const string TextBox::MISC_SYMBOLS = "_|#$&@[]{}\\";
-const string TextBox::ALL_SYMBOLS = TextBox::MATHEXPR_SYMBOLS + TextBox::TEXT_SYMBOLS + TextBox::MISC_SYMBOLS;
+inline const string TextBox::DIGITS = " 0123456789";
+inline const string TextBox::ONLY_DIGITS = "0123456789";
+inline const string TextBox::MATH_SYMBOLS = " ()+-/*^%.,\'";		   // character '\'' is there as a digit separator
+inline const string TextBox::MATHEXPR_SYMBOLS = " <=>~()+-/*^%.,\'";  // character '\'' is there as a digit separator
+inline const string TextBox::TEXT_SYMBOLS = " ,:;.?!-()\"\'`";
+inline const string TextBox::MISC_SYMBOLS = "_|#$&@[]{}\\";
+inline const string TextBox::ALL_SYMBOLS = TextBox::MATHEXPR_SYMBOLS + TextBox::TEXT_SYMBOLS + TextBox::MISC_SYMBOLS;
 
 #endif	// TEXT_BOX_HPP
