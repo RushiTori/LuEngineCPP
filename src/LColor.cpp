@@ -151,9 +151,8 @@ LColor operator*(const LColor& col, float scl) {
 	return temp;
 }
 
-/*bool operator==(const LColor& col, const LColor& other) {
+bool operator==(const LColor& col, const LColor& other) {
 	return (col.r == other.r) && (col.g == other.g) && (col.b == other.b) && (col.a == other.a);
 }
 
 bool operator!=(const LColor& col, const LColor& other) { return !(col == other); }
-*/

@@ -121,7 +121,7 @@ LColor operator/(const LColor& col, float scl);
 LColor& operator*=(LColor& col, float scl);
 LColor operator*(const LColor& col, float scl);
 
-/*bool operator==(const LColor& col, const LColor& other);
-bool operator != (const LColor& col, const LColor& other);*/
+bool operator==(const LColor& col, const LColor& other);
+bool operator != (const LColor& col, const LColor& other);
 
 #endif	// LCOLOR_HPP
