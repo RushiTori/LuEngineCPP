@@ -19,6 +19,7 @@ class LShape {
 
 	LShape() = default;
 	LShape(const LShape& other) = default;
+	virtual ~LShape() {}
 
 	virtual void SetTexture(const Texture2D* tex) final;
 	virtual void SetTexture(const Texture2D* tex, uint x, uint y, uint w, uint h) final;
