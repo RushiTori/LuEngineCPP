@@ -13,9 +13,9 @@ void LTriangle::SetPos(const LVector& pos) {
 	this->pB -= center;
 	this->pC -= center;
 
-	this->pA -= pos;
-	this->pB -= pos;
-	this->pC -= pos;
+	this->pA += pos;
+	this->pB += pos;
+	this->pC += pos;
 }
 
 void LTriangle::Move(const LVector& vel) {
