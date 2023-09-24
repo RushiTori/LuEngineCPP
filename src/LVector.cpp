@@ -61,6 +61,15 @@ LVector LVector::projectOn(const LVector& other) const {
 	return other * (projMag / other.mag());
 }
 
+LVector LVector::projectOn(const LVector& vecA, const LVector& vecB) const { return projectOn(vecB - vecA); }
+
+int LVector::side(const LVector& other) const {
+	float tempSide = (x * other.y) - (y * other.x);
+	return ((tempSide > 0) - (tempSide < 0));
+}
+
+int LVector::side(const LVector& vecA, const LVector& vecB) const { return side(vecB - vecA); }
+
 LVector LVector::clamped(const LVector& vecA, const LVector& vecB) const {
 	const float minX = std::min(vecA.x, vecB.x);
 	const float maxX = std::max(vecA.x, vecB.x);

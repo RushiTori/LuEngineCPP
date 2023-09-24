@@ -34,15 +34,21 @@ struct LVector {
 	LVector norm() const;
 	LVector setMag(float newMag) const;
 	LVector limit(float maxMag) const;
+
 	float mag() const;
 	float mag2() const;
 	float heading() const;
+
 	LVector floor() const;
 	LVector round() const;
 	LVector ceil() const;
+	
 	LVector projectOn(const LVector& other) const;
+	LVector projectOn(const LVector& vecA, const LVector& vecB) const;
+	int side(const LVector& other) const;
+	int side(const LVector& vecA, const LVector& vecB) const;
 	LVector clamped(const LVector& vecA, const LVector& vecB) const;
-	LVector rotate(float angle, const LVector& origin = LVector(0, 0)) const;
+	LVector rotate(float angle, const LVector& origin = LVector()) const;
 };
 
 std::ostream& operator<<(std::ostream& os, const LVector& info);

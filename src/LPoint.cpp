@@ -38,19 +38,19 @@ bool LPoint::CheckCollision(const LRect& other) const {
 }
 
 bool LPoint::CheckCollision(const LTriangle& other) const {
-	bool sideAB = LVector::dot(other.pB - other.pA, this->pos - other.pA) > 0;
-	bool sideBC = LVector::dot(other.pC - other.pB, this->pos - other.pB) > 0;
-	bool sideCA = LVector::dot(other.pA - other.pC, this->pos - other.pC) > 0;
+	int sideAB = (this->pos - other.pA).side(other.pA, other.pB);
+	int sideBC = (this->pos - other.pB).side(other.pB, other.pC);
+	int sideCA = (this->pos - other.pC).side(other.pC, other.pA);
 
 	return ((sideAB == sideBC) && (sideAB == sideCA));
 }
 
 bool LPoint::CheckCollision(const LPoly& other) const {
-	bool posSide = LVector::dot(other.points[1] - other.points[0], this->pos - other.points[0]) > 0;
+	int posSide = (this->pos - other.points[0]).side(other.points[0], other.points[1]);
 
 	for (uint i = 1; i < other.points.size(); i++) {
 		uint j = (i + 1) % other.points.size();
-		bool side = LVector::dot(other.points[j] - other.points[i], this->pos - other.points[i]) > 0;
+		int side = (this->pos - other.points[i]).side(other.points[i], other.points[j]);
 		if (side != posSide) return false;
 	}
 
