@@ -39,8 +39,6 @@ void TexView::DisplayRect(const LVector& pos, const LVector& sizes, LColor tint)
 }
 
 void TexView::DisplayRect(const Rectangle& rec, LColor tint) const {
-	const LVector center(rec.x + (rec.width / 2), rec.y + (rec.height / 2));
-
 	const std::vector<LVector> points{LVector(rec.x, rec.y), LVector(rec.x, rec.y + rec.height),
 									  LVector(rec.x + rec.width, rec.y + rec.height),
 									  LVector(rec.x + rec.width, rec.y)};
@@ -51,7 +49,7 @@ void TexView::DisplayRect(const Rectangle& rec, LColor tint) const {
 								  LVector(uvRec.x + uvRec.width, uvRec.y + uvRec.height),
 								  LVector(uvRec.x + uvRec.width, uvRec.y)};
 
-	Display(center, points, uv, tint);
+	Display(points, uv, tint);
 }
 
 void TexView::DisplayCircle(float x, float y, float r, LColor tint, uint pCount) const {
@@ -63,8 +61,6 @@ void TexView::DisplayCircle(const LVector& pos, float r, LColor tint, uint pCoun
 }
 
 void TexView::DisplayTriangle(const LVector& pA, const LVector& pB, const LVector& pC, LColor tint) const {
-	const LVector center((pA + pB + pC) / 3);
-
 	const std::vector<LVector> points{pA, pB, pC};
 
 	float minX = std::min(pA.x, std::min(pB.x, pC.x));
@@ -83,7 +79,7 @@ void TexView::DisplayTriangle(const LVector& pA, const LVector& pB, const LVecto
 								  LVector::map(pB, minVec, maxVec, minUV, maxUV),
 								  LVector::map(pC, minVec, maxVec, minUV, maxUV)};
 
-	Display(center, points, uv, tint);
+	Display(points, uv, tint);
 }
 
 void TexView::DisplayPoly(const LVector& center, float r, uint pCount, float angle, LColor tint) const {
@@ -93,18 +89,18 @@ void TexView::DisplayPoly(const LVector& center, float r, uint pCount, float ang
 	const LVector minUV(uvRec.x, uvRec.y);
 	const LVector maxUV(uvRec.x + uvRec.width, uvRec.y + uvRec.height);
 
-	std::vector<LVector> points(pCount), uv(pCount);
+	std::vector<LVector> points, uv;
 
 	for (uint i = 0; i < pCount; i++) {
 		float tempAngle = TWO_PI - ((i / (float)pCount) * TWO_PI);
-		LVector tempPoint = LVector::fromAngle(angle + tempAngle, r);
+		LVector tempPoint = center + LVector::fromAngle(angle + tempAngle, r);
 		LVector tempUV = LVector::map(tempPoint.norm(), LVector(-1, -1), LVector(1, 1), minUV, maxUV);
 
 		points.push_back(tempPoint);
 		uv.push_back(tempUV);
 	}
 
-	Display(center, points, uv, tint);
+	Display(points, uv, tint);
 }
 
 void TexView::DisplayPoly(const std::vector<LVector>& points, LColor tint) const {
@@ -114,12 +110,9 @@ void TexView::DisplayPoly(const std::vector<LVector>& points, LColor tint) const
 	const LVector minUV(uvRec.x, uvRec.y);
 	const LVector maxUV(uvRec.x + uvRec.width, uvRec.y + uvRec.height);
 
-	LVector center;
 	LVector minVec, maxVec;
 
 	for (const auto& p : points) {
-		center += p;
-
 		if (p.x < minVec.x) minVec.x = p.x;
 		if (p.y < minVec.y) minVec.y = p.y;
 
@@ -127,23 +120,26 @@ void TexView::DisplayPoly(const std::vector<LVector>& points, LColor tint) const
 		if (p.y > maxVec.y) maxVec.y = p.y;
 	}
 
-	center /= points.size();
-
-	std::vector<LVector> uv(points.size());
+	std::vector<LVector> uv;
 
 	for (const auto& p : points) {
 		uv.push_back(LVector::map(p, minVec, maxVec, minUV, maxUV));
 	}
 
-	Display(center, points, uv, tint);
+	Display(points, uv, tint);
 }
 
-void TexView::Display(const LVector& center, const std::vector<LVector>& points, const std::vector<LVector>& uv,
-					  LColor tint) const {
+void TexView::Display(const std::vector<LVector>& points, const std::vector<LVector>& uv, LColor tint) const {
 	if (points.size() < 3) return;
 	if (points.size() != uv.size()) return;
 
-	rlSetTexture(this->tex->id);
+	LVector center;
+	for (const auto& a : points) {
+		center += a;
+	}
+	center /= points.size();
+
+	rlSetTexture((this->tex) ? this->tex->id : 1);
 
 	// Texturing is only supported on RL_QUADS
 	rlBegin(RL_QUADS);
@@ -157,13 +153,13 @@ void TexView::Display(const LVector& center, const std::vector<LVector>& points,
 		rlVertex2f(center.x, center.y);
 
 		rlTexCoord2f(uv[i].x, uv[i].y);
-		rlVertex2f(points[i].x + center.x, points[i].y + center.y);
+		rlVertex2f(points[i].x, points[i].y);
 
 		rlTexCoord2f(uv[j].x, uv[j].y);
-		rlVertex2f(points[j].x + center.x, points[j].y + center.y);
+		rlVertex2f(points[j].x, points[j].y);
 
 		rlTexCoord2f(uv[j].x, uv[j].y);
-		rlVertex2f(points[j].x + center.x, points[j].y + center.y);
+		rlVertex2f(points[j].x, points[j].y);
 	}
 
 	rlEnd();

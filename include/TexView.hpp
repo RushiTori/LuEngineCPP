@@ -11,7 +11,7 @@ struct TexView {
 	TexView() = default;
 	TexView(const Texture2D* tex_, uint pixelX, uint pixelY, uint pixelWidth, uint pixelHeight);
 	TexView(const Texture2D* tex_, const LVector& texPos, const LVector& texSizes);
-	//TexView(const TexView& other) : tex(other.tex), uvCenter(other.uvCenter), uvSizes(other.uvSizes) {}
+	// TexView(const TexView& other) : tex(other.tex), uvCenter(other.uvCenter), uvSizes(other.uvSizes) {}
 
 	Rectangle GetUVRec() const;
 	LVector GetPixelPos() const;
@@ -28,12 +28,11 @@ struct TexView {
 
 	void DisplayTriangle(const LVector& pA, const LVector& pB, const LVector& pC, LColor tint = LColor::WHITE) const;
 
-	void DisplayPoly(const LVector& center, float r, uint pCount, float angle = 0.0f, LColor tint = LColor::WHITE) const;
+	void DisplayPoly(const LVector& center, float r, uint pCount, float angle = 0.f, LColor tint = LColor::WHITE) const;
 
 	void DisplayPoly(const std::vector<LVector>& points, LColor tint = LColor::WHITE) const;
 
-	void Display(const LVector& center, const std::vector<LVector>& points, const std::vector<LVector>& uv,
-				 LColor tint = LColor::WHITE) const;
+	void Display(const std::vector<LVector>& points, const std::vector<LVector>& uv, LColor tint = LColor::WHITE) const;
 };
 
 #endif	// TEX_VIEW_HPP

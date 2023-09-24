@@ -94,7 +94,7 @@ bool LLine::CheckCollision(const LPoly& other) const {
 	return false;
 }
 
-void LLine::Display() const { this->skin.DisplayTriangle(this->pA, this->pB, this->pB, this->col); }
+void LLine::Display() const { DrawLineV(this->pA, this->pB, this->col); }
 
 std::ostream& operator<<(std::ostream& os, const LLine& info) {
 	os << "{ " << info.pA << ", " << info.pB << ", " << info.col << " }";

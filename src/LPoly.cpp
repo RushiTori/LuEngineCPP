@@ -7,6 +7,8 @@
 #include "LTriangle.hpp"
 
 LPoly::LPoly(const LVector& center, float r, uint pCount, float angle) {
+	if (pCount < 3) return;
+	
 	for (uint i = 0; i < pCount; i++) {
 		this->points.push_back(center + LVector::fromAngle(angle + (TWO_PI - ((i / (float)pCount) * TWO_PI)), r));
 	}
