@@ -6,8 +6,8 @@
 #include "LPoly.hpp"
 #include "LRect.hpp"
 
-void LTriangle::SetPos(const LVector& pos) {
-	LVector center = (this->pA + this->pB + this->pC) / 3;
+void LTriangle::SetCenter(const LVector& pos) {
+	LVector center = GetCenter();
 
 	this->pA -= center;
 	this->pB -= center;
@@ -24,8 +24,6 @@ void LTriangle::Move(const LVector& vel) {
 	this->pC += vel;
 }
 
-LVector LTriangle::GetPos() const { return (this->pA + this->pB + this->pC) / 3; }
-
 LVector LTriangle::GetCenter() const { return (this->pA + this->pB + this->pC) / 3; }
 
 Rectangle LTriangle::GetBoundingBox() const {
@@ -38,36 +36,16 @@ Rectangle LTriangle::GetBoundingBox() const {
 	return (Rectangle){.x = minX, .y = minY, .width = maxX - minX, .height = maxY - minY};
 }
 
-bool LTriangle::CheckCollision(const LPoint& other) const { return other.CheckCollision(*this); }
+uint LTriangle::GetPointsCount() const { return 3; }
 
-bool LTriangle::CheckCollision(const LLine& other) const { return other.CheckCollision(*this); }
-
-bool LTriangle::CheckCollision(const LCircle& other) const { return other.CheckCollision(*this); }
-
-bool LTriangle::CheckCollision(const LRect& other) const { return other.CheckCollision(*this); }
-
-bool LTriangle::CheckCollision(const LTriangle& other) const {
-	if (other.CheckCollision(this->pA) || other.CheckCollision(this->pB) || other.CheckCollision(this->pC)) return true;
-	if (this->CheckCollision(other.pA) || this->CheckCollision(other.pB) || this->CheckCollision(other.pC)) return true;
-
-	if (this->CheckCollision(LLine(other.pA, other.pB))) return true;
-	if (this->CheckCollision(LLine(other.pB, other.pC))) return true;
-	if (this->CheckCollision(LLine(other.pC, other.pA))) return true;
-
-	return false;
+LVector LTriangle::GetPoint(uint idx) const {
+	if (idx == 0) return this->pA;
+	if (idx == 1) return this->pB;
+	if (idx == 2) return this->pC;
+	return LVector();
 }
 
-bool LTriangle::CheckCollision(const LPoly& other) const {
-	if (other.CheckCollision(this->pA) || other.CheckCollision(this->pB) || other.CheckCollision(this->pC)) return true;
-
-	for (uint i = 0; i < other.points.size(); i++) {
-		uint j = (i + 1) % other.points.size();
-		if (this->CheckCollision(LLine(other.points[i], other.points[j]))) return true;
-		if (this->CheckCollision(other.points[i])) return true;
-	}
-
-	return false;
-}
+std::vector<LVector> LTriangle::GetPoints() const { return {this->pA, this->pB, this->pC}; }
 
 void LTriangle::Display() const { this->skin.DisplayTriangle(this->pA, this->pB, this->pC, this->col); }
 

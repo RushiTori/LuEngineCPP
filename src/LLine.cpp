@@ -6,8 +6,8 @@
 #include "LRect.hpp"
 #include "LTriangle.hpp"
 
-void LLine::SetPos(const LVector& pos) {
-	LVector center = (this->pA + this->pB) / 2;
+void LLine::SetCenter(const LVector& pos) {
+	LVector center = GetCenter();
 
 	this->pA -= center;
 	this->pB -= center;
@@ -17,7 +17,7 @@ void LLine::SetPos(const LVector& pos) {
 }
 
 void LLine::Move(const LVector& vel) {
-	LVector center = (this->pA + this->pB) / 2;
+	LVector center = GetCenter();
 
 	this->pA -= center;
 	this->pB -= center;
@@ -28,8 +28,6 @@ void LLine::Move(const LVector& vel) {
 	this->pB += center;
 }
 
-LVector LLine::GetPos() const { return (this->pA + this->pB) / 2; }
-
 LVector LLine::GetCenter() const { return (this->pA + this->pB) / 2; }
 
 Rectangle LLine::GetBoundingBox() const {
@@ -39,62 +37,59 @@ Rectangle LLine::GetBoundingBox() const {
 					   .height = std::max(this->pA.y, this->pB.y) - std::min(this->pA.y, this->pB.y)};
 }
 
-bool LLine::CheckCollision(const LPoint& other) const { return other.CheckCollision(*this); }
+uint LLine::GetPointsCount() const { return 2; }
 
-bool LLine::CheckCollision(const LLine& other) const {
-	float denom = ((other.pB.y - other.pA.y) * (this->pB.x - this->pA.x)) -
-				  ((other.pB.x - other.pA.x) * (this->pB.y - this->pA.y));
+LVector LLine::GetPoint(uint idx) const {
+	if (idx == 0) return this->pA;
+	if (idx == 1) return this->pB;
+	return LVector();
+}
 
-	float uA = ((other.pB.x - other.pA.x) * (this->pA.y - other.pA.y) -
-				(other.pB.y - other.pA.y) * (this->pA.x - other.pA.x)) /
-			   denom;
+std::vector<LVector> LLine::GetPoints() const { return {this->pA, this->pB}; }
 
-	float uB = ((this->pB.x - this->pA.x) * (this->pA.y - other.pA.y) -
-				(this->pB.y - this->pA.y) * (this->pA.x - other.pA.x)) /
+bool LLine::CheckCollision(const LVector& point) const {
+	float distA = LVector::dist(this->pA, point);
+	float distB = LVector::dist(this->pB, point);
+
+	float distAB = distA + distB;
+
+	float realDist = LVector::dist(this->pA, this->pB);
+
+	return ((distAB >= realDist - 0.05f) && (distAB <= realDist + 0.05f));
+}
+
+bool LLine::CheckCollision(const LVector& lineStart, const LVector& lineEnd) const {
+	float lineDistY = lineEnd.y - lineStart.y;
+	float lineDistX = lineEnd.x - lineStart.x;
+
+	float denom = (lineDistY * (this->pB.x - this->pA.x)) - (lineDistX * (this->pB.y - this->pA.y));
+
+	float uA = (lineDistX * (this->pA.y - lineStart.y) - lineDistY * (this->pA.x - lineStart.x)) / denom;
+	float uB = ((this->pB.x - this->pA.x) * (this->pA.y - lineStart.y) -
+				(this->pB.y - this->pA.y) * (this->pA.x - lineStart.x)) /
 			   denom;
 
 	return ((uA > 0 && uA < 1) && (uB > 0 && uB < 1));
 }
 
-bool LLine::CheckCollision(const LCircle& other) const {
-	if (other.CheckCollision(this->pA) || other.CheckCollision(this->pB)) return true;
+bool LLine::CheckCollision(const LVector& center, float radius) const {
+	if (LVector::dist2(this->pA, center) <= (radius * radius)) return true;
+	if (LVector::dist2(this->pB, center) <= (radius * radius)) return true;
 
-	LVector AB = this->pB - this->pA;
-	float ConABmag = LVector::dot(AB.norm(), other.pos);
+	LVector AtoB = this->pB - this->pA;
+	LVector AtoCenter = center - this->pA;
 
-	if ((ConABmag < 0) || ((ConABmag * ConABmag) > AB.mag2())) return false;
+	float dotScale = LVector::dot(AtoCenter, AtoB.norm());
+	if ((dotScale < 0) || ((dotScale * dotScale) > AtoB.mag2())) return false;
 
-	LVector ConAB = AB.setMag(ConABmag);
-	return other.CheckCollision(ConAB);
+	LVector ConAB = this->pA + AtoB.setMag(dotScale);
+
+	return (LVector::dist2(ConAB, center) <= (radius * radius));
 }
 
-bool LLine::CheckCollision(const LRect& other) const {
-	if (other.CheckCollision(this->pA) || other.CheckCollision(this->pB)) return true;
-	if (this->CheckCollision(LLine(other.x, other.y, other.x + other.w, other.y))) return true;
-	if (this->CheckCollision(LLine(other.x + other.w, other.y, other.x + other.w, other.y + other.h))) return true;
-	if (this->CheckCollision(LLine(other.x + other.w, other.y + other.h, other.x, other.y + other.h))) return true;
-	if (this->CheckCollision(LLine(other.x, other.y + other.h, other.x, other.y))) return true;
-	return false;
-}
+bool LLine::CheckCollision(const LShape& shape) const { return shape.CheckCollision(this->pA, this->pB); }
 
-bool LLine::CheckCollision(const LTriangle& other) const {
-	if (other.CheckCollision(this->pA) || other.CheckCollision(this->pB)) return true;
-	if (this->CheckCollision(LLine(other.pA, other.pB))) return true;
-	if (this->CheckCollision(LLine(other.pB, other.pC))) return true;
-	if (this->CheckCollision(LLine(other.pC, other.pA))) return true;
-	return false;
-}
-
-bool LLine::CheckCollision(const LPoly& other) const {
-	if (other.CheckCollision(this->pA) || other.CheckCollision(this->pB)) return true;
-	for (uint i = 0; i < other.points.size(); i++) {
-		uint j = (i + 1) % other.points.size();
-		if (this->CheckCollision(LLine(other.points[i], other.points[j]))) return true;
-	}
-	return false;
-}
-
-void LLine::Display() const { DrawLineV(this->pA, this->pB, this->col); }
+void LLine::Display() const { DrawLineEx(this->pA, this->pB, 2, this->col); }
 
 std::ostream& operator<<(std::ostream& os, const LLine& info) {
 	os << "{ " << info.pA << ", " << info.pB << ", " << info.col << " }";
