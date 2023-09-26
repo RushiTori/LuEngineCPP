@@ -93,10 +93,10 @@ void TexView::DisplayPoly(const LVector& center, float r, uint pCount, float ang
 
 	for (uint i = 0; i < pCount; i++) {
 		float tempAngle = TWO_PI - ((i / (float)pCount) * TWO_PI);
-		LVector tempPoint = center + LVector::fromAngle(angle + tempAngle, r);
+		LVector tempPoint = LVector::fromAngle(angle + tempAngle, r);
 		LVector tempUV = LVector::map(tempPoint.norm(), LVector(-1, -1), LVector(1, 1), minUV, maxUV);
 
-		points.push_back(tempPoint);
+		points.push_back(center + tempPoint);
 		uv.push_back(tempUV);
 	}
 
@@ -106,24 +106,26 @@ void TexView::DisplayPoly(const LVector& center, float r, uint pCount, float ang
 void TexView::DisplayPoly(const std::vector<LVector>& points, LColor tint) const {
 	if (points.size() < 3) return;
 
-	const Rectangle uvRec = GetUVRec();
-	const LVector minUV(uvRec.x, uvRec.y);
-	const LVector maxUV(uvRec.x + uvRec.width, uvRec.y + uvRec.height);
-
-	LVector minVec, maxVec;
-
-	for (const auto& p : points) {
-		if (p.x < minVec.x) minVec.x = p.x;
-		if (p.y < minVec.y) minVec.y = p.y;
-
-		if (p.x > maxVec.x) maxVec.x = p.x;
-		if (p.y > maxVec.y) maxVec.y = p.y;
+	LVector center;
+	for (const auto& a : points) {
+		center += a;
 	}
+	center /= points.size();
+
+	float farthest = 0;
+	for (const auto& a : points) {
+		farthest = std::max(farthest, LVector::dist(center, a));
+	}
+
+	const Rectangle uvRec = GetUVRec();
 
 	std::vector<LVector> uv;
 
-	for (const auto& p : points) {
-		uv.push_back(LVector::map(p, minVec, maxVec, minUV, maxUV));
+	for (const auto& a : points) {
+		LVector tempUV = LVector::fromAngle((a - center).heading(), LVector::dist(center, a) / farthest);
+		tempUV = LVector::map(tempUV, LVector(-1, -1), LVector(1, 1), LVector(uvRec.x, uvRec.y),
+					 LVector(uvRec.x + uvRec.width, uvRec.y + uvRec.height));
+		uv.push_back(tempUV);
 	}
 
 	Display(points, uv, tint);
