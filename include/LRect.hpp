@@ -17,17 +17,17 @@ class LRect : public LShape {
 
 	LRect(const LRect& other) = default;
 
-	virtual void SetCenter(const LVector& pos);
-	virtual void Move(const LVector& vel);
+	virtual void Rotate(float angle);
 
-	virtual LVector GetCenter() const;
-	virtual Rectangle GetBoundingBox() const;
+	virtual void Move(const LVector& vel);
 
 	virtual uint GetPointsCount() const;
 	virtual LVector GetPoint(uint idx) const;
-	virtual std::vector<LVector> GetPoints() const;
 
 	virtual void Display() const;
+
+   protected:
+	virtual void ResetPoints(const std::vector<LVector>& points);
 };
 
 std::ostream& operator<<(std::ostream& os, const LRect& info);

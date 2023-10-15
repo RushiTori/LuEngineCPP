@@ -1,5 +1,21 @@
 #include "TexView.hpp"
 
+inline LVector AveragePoints(const std::vector<LVector>& points) {
+	LVector center;
+	for (const auto& a : points) {
+		center += a;
+	}
+	if (points.size()) center /= points.size();
+	return center;
+}
+
+inline void RotatePoints(std::vector<LVector>& points, float angle) {
+	LVector center = AveragePoints(points);
+	for (auto& a : points) {
+		a = a.rotate(angle, center);
+	}
+}
+
 TexView::TexView(const Texture2D* tex_, uint pixelX, uint pixelY, uint pixelWidth, uint pixelHeight)
 	: TexView(tex_, LVector(pixelX / (float)(tex_->width), pixelY / (float)(tex_->height)),
 			  LVector(pixelWidth / (float)(tex_->width), pixelHeight / (float)(tex_->height))) {}
@@ -26,19 +42,20 @@ Rectangle TexView::GetPixelRec() const {
 	return (Rectangle){.x = pos.x, .y = pos.y, .width = sizes.x, .height = sizes.y};
 }
 
-void TexView::DisplayRect(float x, float y, float w, float h, LColor tint) const {
-	DisplayRect((Rectangle){.x = x, .y = y, .width = w, .height = h}, tint);
+void TexView::DisplayRect(float x, float y, float w, float h, float shapeAngle, float uvAngle, LColor tint) const {
+	DisplayRect((Rectangle){.x = x, .y = y, .width = w, .height = h}, shapeAngle, uvAngle, tint);
 }
 
-void TexView::DisplayRect(const LVector& pos, float w, float h, LColor tint) const {
-	DisplayRect((Rectangle){.x = pos.x, .y = pos.y, .width = w, .height = h}, tint);
+void TexView::DisplayRect(const LVector& pos, float w, float h, float shapeAngle, float uvAngle, LColor tint) const {
+	DisplayRect((Rectangle){.x = pos.x, .y = pos.y, .width = w, .height = h}, shapeAngle, uvAngle, tint);
 }
 
-void TexView::DisplayRect(const LVector& pos, const LVector& sizes, LColor tint) const {
-	DisplayRect((Rectangle){.x = pos.x, .y = pos.y, .width = sizes.x, .height = sizes.y}, tint);
+void TexView::DisplayRect(const LVector& pos, const LVector& sizes, float shapeAngle, float uvAngle,
+						  LColor tint) const {
+	DisplayRect((Rectangle){.x = pos.x, .y = pos.y, .width = sizes.x, .height = sizes.y}, shapeAngle, uvAngle, tint);
 }
 
-void TexView::DisplayRect(const Rectangle& rec, LColor tint) const {
+void TexView::DisplayRect(const Rectangle& rec, float shapeAngle, float uvAngle, LColor tint) const {
 	const std::vector<LVector> points{LVector(rec.x, rec.y), LVector(rec.x, rec.y + rec.height),
 									  LVector(rec.x + rec.width, rec.y + rec.height),
 									  LVector(rec.x + rec.width, rec.y)};
@@ -49,18 +66,21 @@ void TexView::DisplayRect(const Rectangle& rec, LColor tint) const {
 								  LVector(uvRec.x + uvRec.width, uvRec.y + uvRec.height),
 								  LVector(uvRec.x + uvRec.width, uvRec.y)};
 
-	Display(points, uv, tint);
+	Display(points, uv, shapeAngle, uvAngle, tint);
 }
 
-void TexView::DisplayCircle(float x, float y, float r, LColor tint, uint pCount) const {
-	DisplayCircle(LVector(x, y), r, tint, pCount);
+void TexView::DisplayCircle(float x, float y, float r, float shapeAngle, float uvAngle, LColor tint,
+							uint pCount) const {
+	DisplayCircle(LVector(x, y), r, shapeAngle, uvAngle, tint, pCount);
 }
 
-void TexView::DisplayCircle(const LVector& pos, float r, LColor tint, uint pCount) const {
-	DisplayPoly(pos, r, pCount, 0.0f, tint);
+void TexView::DisplayCircle(const LVector& pos, float r, float shapeAngle, float uvAngle, LColor tint,
+							uint pCount) const {
+	DisplayPoly(pos, r, pCount, shapeAngle, uvAngle, tint);
 }
 
-void TexView::DisplayTriangle(const LVector& pA, const LVector& pB, const LVector& pC, LColor tint) const {
+void TexView::DisplayTriangle(const LVector& pA, const LVector& pB, const LVector& pC, float shapeAngle, float uvAngle,
+							  LColor tint) const {
 	const std::vector<LVector> points{pA, pB, pC};
 
 	float minX = std::min(pA.x, std::min(pB.x, pC.x));
@@ -79,10 +99,11 @@ void TexView::DisplayTriangle(const LVector& pA, const LVector& pB, const LVecto
 								  LVector::map(pB, minVec, maxVec, minUV, maxUV),
 								  LVector::map(pC, minVec, maxVec, minUV, maxUV)};
 
-	Display(points, uv, tint);
+	Display(points, uv, 0, uvAngle - shapeAngle, tint);
 }
 
-void TexView::DisplayPoly(const LVector& center, float r, uint pCount, float angle, LColor tint) const {
+void TexView::DisplayPoly(const LVector& center, float r, uint pCount, float shapeAngle, float uvAngle,
+						  LColor tint) const {
 	if (pCount < 3) return;
 
 	const Rectangle uvRec = GetUVRec();
@@ -93,17 +114,17 @@ void TexView::DisplayPoly(const LVector& center, float r, uint pCount, float ang
 
 	for (uint i = 0; i < pCount; i++) {
 		float tempAngle = TWO_PI - ((i / (float)pCount) * TWO_PI);
-		LVector tempPoint = LVector::fromAngle(angle + tempAngle, r);
+		LVector tempPoint = LVector::fromAngle(shapeAngle + tempAngle, r);
 		LVector tempUV = LVector::map(tempPoint.norm(), LVector(-1, -1), LVector(1, 1), minUV, maxUV);
 
 		points.push_back(center + tempPoint);
 		uv.push_back(tempUV);
 	}
 
-	Display(points, uv, tint);
+	Display(points, uv, 0, uvAngle - shapeAngle, tint);
 }
 
-void TexView::DisplayPoly(const std::vector<LVector>& points, LColor tint) const {
+void TexView::DisplayPoly(const std::vector<LVector>& points, float shapeAngle, float uvAngle, LColor tint) const {
 	if (points.size() < 3) return;
 
 	LVector center;
@@ -122,16 +143,19 @@ void TexView::DisplayPoly(const std::vector<LVector>& points, LColor tint) const
 	std::vector<LVector> uv;
 
 	for (const auto& a : points) {
-		LVector tempUV = LVector::fromAngle((a - center).heading(), LVector::dist(center, a) / farthest);
+		LVector tempA = a - center;
+		tempA = tempA.rotate(-shapeAngle);
+		LVector tempUV = LVector::fromAngle(tempA.heading()+uvAngle, tempA.mag() / farthest);
 		tempUV = LVector::map(tempUV, LVector(-1, -1), LVector(1, 1), LVector(uvRec.x, uvRec.y),
-					 LVector(uvRec.x + uvRec.width, uvRec.y + uvRec.height));
+							  LVector(uvRec.x + uvRec.width, uvRec.y + uvRec.height));
 		uv.push_back(tempUV);
 	}
 
-	Display(points, uv, tint);
+	Display(points, uv, 0, 0, tint);
 }
 
-void TexView::Display(const std::vector<LVector>& points, const std::vector<LVector>& uv, LColor tint) const {
+void TexView::Display(const std::vector<LVector>& points, const std::vector<LVector>& uv, float shapeAngle,
+					  float uvAngle, LColor tint) const {
 	if (points.size() < 3) return;
 	if (points.size() != uv.size()) return;
 
@@ -151,17 +175,23 @@ void TexView::Display(const std::vector<LVector>& points, const std::vector<LVec
 	for (uint i = 0; i < points.size(); i++) {
 		uint j = (i + 1) % points.size();
 
+		LVector pA = points[i].rotate(shapeAngle, center);
+		LVector pB = points[j].rotate(shapeAngle, center);
+
+		LVector uvA = uv[i].rotate(uvAngle, uvCenter);
+		LVector uvB = uv[j].rotate(uvAngle, uvCenter);
+
 		rlTexCoord2f(this->uvCenter.x, this->uvCenter.y);
 		rlVertex2f(center.x, center.y);
 
-		rlTexCoord2f(uv[i].x, uv[i].y);
-		rlVertex2f(points[i].x, points[i].y);
+		rlTexCoord2f(uvA.x, uvA.y);
+		rlVertex2f(pA.x, pA.y);
 
-		rlTexCoord2f(uv[j].x, uv[j].y);
-		rlVertex2f(points[j].x, points[j].y);
+		rlTexCoord2f(uvB.x, uvB.y);
+		rlVertex2f(pB.x, pB.y);
 
-		rlTexCoord2f(uv[j].x, uv[j].y);
-		rlVertex2f(points[j].x, points[j].y);
+		rlTexCoord2f(uvB.x, uvB.y);
+		rlVertex2f(pB.x, pB.y);
 	}
 
 	rlEnd();

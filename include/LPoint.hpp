@@ -14,16 +14,11 @@ class LPoint : public LShape {
 	operator LVector() const { return pos; }
 
 	LPoint(const LPoint& other) = default;
-
-	virtual void SetCenter(const LVector& pos);
-	virtual void Move(const LVector& vel);
-
-	virtual LVector GetCenter() const;
+	
 	virtual Rectangle GetBoundingBox() const;
 
 	virtual uint GetPointsCount() const;
 	virtual LVector GetPoint(uint idx) const;
-	virtual std::vector<LVector> GetPoints() const;
 
 	virtual bool CheckCollision(const LVector& point) const;
 	virtual bool CheckCollision(const LVector& lineStart, const LVector& lineEnd) const;
@@ -32,6 +27,9 @@ class LPoint : public LShape {
 	virtual bool CheckCollision(const LShape& shape) const;
 
 	virtual void Display() const;
+
+   protected:
+	virtual void ResetPoints(const std::vector<LVector>& points);
 };
 
 std::ostream& operator<<(std::ostream& os, const LPoint& info);

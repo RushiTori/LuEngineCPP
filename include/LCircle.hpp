@@ -14,16 +14,16 @@ class LCircle : public LShape {
 	LCircle(const LVector& pos_, float r_) : pos(pos_), r(r_) {}
 
 	LCircle(const LCircle& other) = default;
+	
+	virtual void Rotate(float angle);
 
 	virtual void SetCenter(const LVector& pos);
-	virtual void Move(const LVector& vel);
 
 	virtual LVector GetCenter() const;
 	virtual Rectangle GetBoundingBox() const;
 
 	virtual uint GetPointsCount() const;
 	virtual LVector GetPoint(uint idx) const;
-	virtual std::vector<LVector> GetPoints() const;
 
 	virtual bool CheckCollision(const LVector& point) const;
 	virtual bool CheckCollision(const LVector& lineStart, const LVector& lineEnd) const;
@@ -31,7 +31,8 @@ class LCircle : public LShape {
 
 	virtual bool CheckCollision(const LShape& shape) const;
 
-	virtual void Display() const;
+   protected:
+	virtual void ResetPoints(const std::vector<LVector>& points);
 };
 
 std::ostream& operator<<(std::ostream& os, const LCircle& info);

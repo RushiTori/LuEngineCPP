@@ -2,7 +2,6 @@
 
 #include "LCircle.hpp"
 #include "LLine.hpp"
-#include "LPoint.hpp"
 
 void LShape::SetTexture(const Texture2D* tex) { SetTexture(tex, 0, 0, tex->width, tex->height); }
 
@@ -10,6 +9,79 @@ void LShape::SetTexture(const Texture2D* tex, uint x, uint y, uint w, uint h) { 
 
 void LShape::SetSkin(const TexView& skin) {
 	if (skin.tex) this->skin = skin;
+}
+
+void LShape::SetRotation(float angle) { Rotate(angle - this->angle); }
+
+void LShape::Rotate(float angle) {
+	this->angle += angle;
+	auto points = GetPoints();
+	auto center = GetCenter();
+	for (auto& a : points) {
+		a = a.rotate(angle, center);
+	}
+	ResetPoints(points);
+}
+
+void LShape::Rotate(float angle, const LVector& anchor) {
+	auto center = GetCenter();
+	SetCenter(center.rotate(angle, anchor));
+}
+
+void LShape::SetCenter(const LVector& pos) { Move(pos - GetCenter()); }
+
+void LShape::Move(const LVector& vel) {
+	auto points = GetPoints();
+	for (auto& a : points) {
+		a += vel;
+	}
+	ResetPoints(points);
+}
+
+float LShape::GetAngle() const { return this->angle; }
+
+LVector LShape::GetCenter() const {
+	uint pCount = GetPointsCount();
+
+	LVector center;
+
+	for (uint i = 0; i < pCount; i++) {
+		center += GetPoint(i);
+	}
+
+	if (pCount) center /= pCount;
+
+	return center;
+}
+
+Rectangle LShape::GetBoundingBox() const {
+	uint pCount = GetPointsCount();
+	if (!pCount) return (Rectangle){.x = 0, .y = 0, .width = 0, .height = 0};
+
+	float minX = GetPoint(0).x;
+	float minY = GetPoint(0).y;
+	float maxX = GetPoint(0).x;
+	float maxY = GetPoint(0).y;
+
+	for (uint i = 1; i < pCount; i++) {
+		LVector temp = GetPoint(i);
+		if (temp.x < minX) minX = temp.x;
+		if (temp.y < minY) minY = temp.y;
+
+		if (temp.x > maxX) maxX = temp.x;
+		if (temp.y > maxY) maxY = temp.y;
+	}
+
+	return (Rectangle){.x = minX, .y = minY, .width = maxX - minX, .height = maxY - minY};
+}
+
+std::vector<LVector> LShape::GetPoints() const {
+	uint pCount = GetPointsCount();
+	std::vector<LVector> points(pCount);
+	for (uint i = 0; i < pCount; i++) {
+		points[i] = GetPoint(i);
+	}
+	return points;
 }
 
 bool LShape::CheckCollision(const LVector& point) const {
@@ -108,4 +180,4 @@ bool LShape::CheckCollision(const LShape& shape) const {
 	return false;
 }
 
-void LShape::Display() const {}
+void LShape::Display() const { this->skin.DisplayPoly(GetPoints(), this->angle, 0, this->col); }

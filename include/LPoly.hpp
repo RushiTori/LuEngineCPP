@@ -14,17 +14,11 @@ class LPoly : public LShape {
 
 	LPoly(const LPoly& other) = default;
 
-	virtual void SetCenter(const LVector& pos);
-	virtual void Move(const LVector& vel);
-
-	virtual LVector GetCenter() const;
-	virtual Rectangle GetBoundingBox() const;
-
 	virtual uint GetPointsCount() const;
 	virtual LVector GetPoint(uint idx) const;
-	virtual std::vector<LVector> GetPoints() const;
 
-	virtual void Display() const;
+   protected:
+	virtual void ResetPoints(const std::vector<LVector>& points);
 };
 
 std::ostream& operator<<(std::ostream& os, const LPoly& info);

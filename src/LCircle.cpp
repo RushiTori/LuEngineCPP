@@ -1,14 +1,8 @@
 #include "LCircle.hpp"
 
-#include "LLine.hpp"
-#include "LPoint.hpp"
-#include "LPoly.hpp"
-#include "LRect.hpp"
-#include "LTriangle.hpp"
+void LCircle::Rotate(float angle) { this->angle += angle; }
 
 void LCircle::SetCenter(const LVector& pos) { this->pos = pos; }
-
-void LCircle::Move(const LVector& vel) { this->pos += vel; }
 
 LVector LCircle::GetCenter() const { return this->pos; }
 
@@ -21,16 +15,8 @@ uint LCircle::GetPointsCount() const { return 32; }
 LVector LCircle::GetPoint(uint idx) const {
 	uint pCount = GetPointsCount();
 	if (idx >= pCount) return LVector();
-	return this->pos + LVector::fromAngle(TWO_PI - ((idx / (float)pCount) * TWO_PI), this->r);
-}
-
-std::vector<LVector> LCircle::GetPoints() const {
-	std::vector<LVector> points;
-	uint pCount = GetPointsCount();
-	for (uint i = 0; i < pCount; i++) {
-		points.push_back(this->pos + LVector::fromAngle(TWO_PI - ((i / (float)pCount) * TWO_PI), this->r));
-	}
-	return points;
+	float pAngle = TWO_PI - ((idx / (float)pCount) * TWO_PI);
+	return this->pos + LVector::fromAngle(this->angle + pAngle, this->r);
 }
 
 bool LCircle::CheckCollision(const LVector& point) const {
@@ -57,7 +43,7 @@ bool LCircle::CheckCollision(const LVector& center, float radius) const {
 
 bool LCircle::CheckCollision(const LShape& shape) const { return shape.CheckCollision(this->pos, this->r); }
 
-void LCircle::Display() const { this->skin.DisplayCircle(this->pos, this->r, this->col); }
+void LCircle::ResetPoints([[maybe_unused]] const std::vector<LVector>& points) {}
 
 std::ostream& operator<<(std::ostream& os, const LCircle& info) {
 	os << "{ " << info.pos << ", " << info.r << ", " << info.col << " }";

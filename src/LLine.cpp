@@ -1,42 +1,5 @@
 #include "LLine.hpp"
 
-#include "LCircle.hpp"
-#include "LPoint.hpp"
-#include "LPoly.hpp"
-#include "LRect.hpp"
-#include "LTriangle.hpp"
-
-void LLine::SetCenter(const LVector& pos) {
-	LVector center = GetCenter();
-
-	this->pA -= center;
-	this->pB -= center;
-
-	this->pA += pos;
-	this->pB += pos;
-}
-
-void LLine::Move(const LVector& vel) {
-	LVector center = GetCenter();
-
-	this->pA -= center;
-	this->pB -= center;
-
-	center += vel;
-
-	this->pA += center;
-	this->pB += center;
-}
-
-LVector LLine::GetCenter() const { return (this->pA + this->pB) / 2; }
-
-Rectangle LLine::GetBoundingBox() const {
-	return (Rectangle){.x = std::min(this->pA.x, this->pB.x),
-					   .y = std::min(this->pA.y, this->pB.y),
-					   .width = std::max(this->pA.x, this->pB.x) - std::min(this->pA.x, this->pB.x),
-					   .height = std::max(this->pA.y, this->pB.y) - std::min(this->pA.y, this->pB.y)};
-}
-
 uint LLine::GetPointsCount() const { return 2; }
 
 LVector LLine::GetPoint(uint idx) const {
@@ -44,8 +7,6 @@ LVector LLine::GetPoint(uint idx) const {
 	if (idx == 1) return this->pB;
 	return LVector();
 }
-
-std::vector<LVector> LLine::GetPoints() const { return {this->pA, this->pB}; }
 
 bool LLine::CheckCollision(const LVector& point) const {
 	float distA = LVector::dist(this->pA, point);
@@ -90,6 +51,11 @@ bool LLine::CheckCollision(const LVector& center, float radius) const {
 bool LLine::CheckCollision(const LShape& shape) const { return shape.CheckCollision(this->pA, this->pB); }
 
 void LLine::Display() const { DrawLineEx(this->pA, this->pB, 2, this->col); }
+
+void LLine::ResetPoints(const std::vector<LVector>& points) {
+	this->pA = points[0];
+	this->pB = points[1];
+}
 
 std::ostream& operator<<(std::ostream& os, const LLine& info) {
 	os << "{ " << info.pA << ", " << info.pB << ", " << info.col << " }";
