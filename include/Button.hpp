@@ -5,7 +5,8 @@
 
 using ButtonAction = std::function<void(void)>;
 
-struct Button {
+class Button {
+   public:
 	ButtonAction onClick = []() {}, onHold = []() {}, onRelease = []() {};
 	Rectangle body = (Rectangle){.x = 0, .y = 0, .width = 275, .height = 30};
 	MouseButton button = MOUSE_LEFT_BUTTON;
@@ -15,13 +16,15 @@ struct Button {
 
 	Button(const Button& other);
 
+	virtual ~Button() = default;
+
 	void SetPos(const LVector& pos);
 	void Move(const LVector& vel);
 	void SetSizes(const LVector& sizes);
 	void SetBody(const Rectangle& rec = (Rectangle){.x = 0, .y = 0, .width = 275, .height = 30});
 
-	void Update(const LVector& cursorPos = GetMousePosition());
-	void Display() const;
+	virtual void Update(const LVector& cursorPos = GetMousePosition());
+	virtual void Display() const;
 };
 
 #endif	// BUTTON_HPP
