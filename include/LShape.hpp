@@ -9,10 +9,10 @@ class LCircle;
 class LShape {
    protected:
 	TexView skin;
-	float angle;
+	float angle = 0;
 
    public:
-	LColor col;
+	LColor col = LColor::WHITE;
 
 	LShape() = default;
 	LShape(const LShape& other) = default;

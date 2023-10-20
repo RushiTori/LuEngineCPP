@@ -79,24 +79,7 @@ LVector LVector::clamped(const LVector& vecA, const LVector& vecB) const {
 }
 
 LVector LVector::rotate(float angle, const LVector& origin) const {
-	if (origin == LVector()) {
-		if (angle == HALF_PI) {
-			return LVector(-y, x);
-		} else if (angle == PI) {
-			return LVector(-x, -y);
-		} else if (angle == PI + HALF_PI) {
-			return LVector(y, -x);
-		}
-		return LVector::fromAngle(heading() + angle, mag());
-	}
 	LVector toThis = (*this) - origin;
-	if (angle == HALF_PI) {
-		return origin + LVector(-toThis.y, toThis.x);
-	} else if (angle == PI) {
-		return origin + LVector(-toThis.x, -toThis.y);
-	} else if (angle == PI + HALF_PI) {
-		return origin + LVector(toThis.y, -toThis.x);
-	}
 	return origin + LVector::fromAngle(toThis.heading() + angle, toThis.mag());
 }
 
