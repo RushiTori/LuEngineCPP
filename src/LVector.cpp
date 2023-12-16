@@ -2,6 +2,12 @@
 
 LVector LVector::fromAngle(float angle, float mag) { return LVector(std::cos(angle) * mag, std::sin(angle) * mag); }
 
+LVector LVector::rand(float startAngle, float endAngle, float mag) {
+	float randAngle = std::rand() / (float)RAND_MAX;
+	randAngle = mapValue(randAngle, 0.0f, 1.0f, startAngle, endAngle);
+	return LVector::fromAngle(randAngle, mag);
+}
+
 float LVector::dot(const LVector& vecA, const LVector& vecB) { return vecA.x * vecB.x + vecA.y * vecB.y; }
 
 float LVector::angleBetween(const LVector& vecA, const LVector& vecB) {

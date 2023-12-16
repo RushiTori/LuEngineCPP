@@ -21,7 +21,7 @@ struct LVector {
 	LVector(const LVector& other) = default;
 
 	static LVector fromAngle(float angle, float mag = 1.0f);
-	static LVector randCircle(float mag = 1.0f);
+	static LVector rand(float startAngle = 0.0f, float endAngle = TWO_PI, float mag = 1.0f);
 	static float dot(const LVector& vecA, const LVector& vecB);
 	static float angleBetween(const LVector& vecA, const LVector& vecB);
 	static float dist(const LVector& vecA, const LVector& vecB);
