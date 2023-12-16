@@ -1,5 +1,14 @@
 #include "LColor.hpp"
 
+LColor LColor::randRGB(uchar alpha) { return LColor(std::rand() % 256, std::rand() % 256, std::rand() % 256, alpha); }
+
+LColor LColor::randHSB(uchar alpha) {
+	float randHue = (std::rand() / (float)RAND_MAX) * 6;
+	float randSat = std::rand() / (float)RAND_MAX;
+	float randBright = std::rand() / (float)RAND_MAX;
+	return LColor::fromHSB(randHue, randSat, randBright, alpha);
+}
+
 LColor LColor::fromHSB(float hue, float saturation, float brightness, uchar alpha) {
 	if (hue < 0) {
 		hue = 0 + (hue - std::floor(hue));

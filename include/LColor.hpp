@@ -39,6 +39,8 @@ struct LColor {
 
 	LColor(const LColor& other) = default;
 
+	static LColor randRGB(uchar alpha = 255);
+	static LColor randHSB(uchar alpha = 255);
 	static LColor fromHSB(float hue, float saturation, float brightness, uchar alpha = 255);
 	static LColor lerp(const LColor& start, const LColor& end, float time, bool doAlpha = false);
 
