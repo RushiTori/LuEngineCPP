@@ -16,15 +16,9 @@ endif
 
 # ========= Everything project related =========
 
-
 PROJ    := libLuEngineCPP
 TARGET  := $(PROJ).a
 DTARGET := $(PROJ)_debug.a
-
-ifeq ($(USED_OS), Windows)
-	TARGET  := $(PROJ).lib
-	DTARGET := $(PROJ)_debug.lib
-endif
 
 STATIC_PATH := errorLib
 
@@ -53,7 +47,12 @@ INC_FILES := $(wildcard $(INC_DIR)/*.hpp)
 
 # ========== Everything flags related ==========
 
-O_FLAGS := -O3 -I include/ -std=c++20 -Wall -Wextra -Werror -Wfatal-errors
+O_FLAGS := -O3 -std=c++20 -Wall -Wextra -Werror -Wfatal-errors -Wno-missing-field-initializers
+O_FLAGS += -I include
+
+ifeq ($(USED_OS), Windows)
+	O_FLAGS += -I C:/CustomLibs/include
+endif
 
 # =========== Every usable functions ===========
 
@@ -103,9 +102,11 @@ libHeader:
 	@$(RM) LuEngine.hpp
 	@touch LuEngine.hpp
 	@echo "#ifndef LU_ENGINE_HPP" >> LuEngine.hpp
-	@echo "#define LU_ENGINE_HPP\n" >> LuEngine.hpp
+	@echo "#define LU_ENGINE_HPP" >> LuEngine.hpp
+	@echo "" >> LuEngine.hpp
 	@./createLibHeader.sh
-	@echo "\n#endif  // LU_ENGINE_HPP" >> LuEngine.hpp
+	@echo "" >> LuEngine.hpp
+	@echo "#endif  // LU_ENGINE_HPP" >> LuEngine.hpp
 
 build: $(TARGET) 
 	@$(MAKE) --silent libHeader

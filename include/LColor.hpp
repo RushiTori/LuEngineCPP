@@ -6,6 +6,8 @@
 #include <raymath.h>
 #include <rlgl.h>
 
+#undef PI
+
 #include <LuLibCPP/LuUtils.hpp>
 
 #undef YELLOW
