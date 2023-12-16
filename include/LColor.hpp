@@ -6,7 +6,9 @@
 #include <raymath.h>
 #include <rlgl.h>
 
+#ifndef LU_CONSTANTS_HPP
 #undef PI
+#endif	// LU_CONSTANTS_HPP
 
 #include <LuLibCPP/LuUtils.hpp>
 

@@ -6,7 +6,9 @@
 #include <raymath.h>
 #include <rlgl.h>
 
+#ifndef LU_CONSTANTS_HPP
 #undef PI
+#endif	// LU_CONSTANTS_HPP
 
 #include <LuLibCPP/LuUtils.hpp>
 
@@ -14,11 +16,12 @@ struct LVector {
 	float x, y;
 
 	// All the constructors and static functions
-	LVector(float x_ = 0, float y_ = 0): x(x_), y(y_) {}
+	LVector(float x_ = 0, float y_ = 0) : x(x_), y(y_) {}
 
 	LVector(const LVector& other) = default;
 
-	static LVector fromAngle(float angle, float mag);
+	static LVector fromAngle(float angle, float mag = 1.0f);
+	static LVector randCircle(float mag = 1.0f);
 	static float dot(const LVector& vecA, const LVector& vecB);
 	static float angleBetween(const LVector& vecA, const LVector& vecB);
 	static float dist(const LVector& vecA, const LVector& vecB);
@@ -44,7 +47,7 @@ struct LVector {
 	LVector floor() const;
 	LVector round() const;
 	LVector ceil() const;
-	
+
 	LVector projectOn(const LVector& other) const;
 	LVector projectOn(const LVector& vecA, const LVector& vecB) const;
 	int side(const LVector& other) const;
