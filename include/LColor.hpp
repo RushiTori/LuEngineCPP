@@ -1,92 +1,179 @@
 #ifndef LCOLOR_HPP
 #define LCOLOR_HPP
 
-#include <rayconfig.h>
+#include <LuLibCPP/LUtils.hpp>
+
 #include <raylib.h>
-#include <raymath.h>
-#include <rlgl.h>
-
-#ifndef LU_CONSTANTS_HPP
-#undef PI
-#endif	// LU_CONSTANTS_HPP
-
-#include <LuLibCPP/LuUtils.hpp>
-
-#undef YELLOW
-#undef RED
-#undef GREEN
-#undef BLUE
-#undef WHITE
-#undef BLACK
-#undef BLANK
-#undef MAGENTA
 
 struct LColor {
-	static const uint RED_OFFSET, GREEN_OFFSET, BLUE_OFFSET, ALPHA_OFFSET;
-	static const uint RED_MASK, GREEN_MASK, BLUE_MASK, ALPHA_MASK;
+	static constexpr uint32_t R_MASK = 0xFF'00'00'00;
+	static constexpr uint32_t R_OFFSET = 8 * 3;
 
-	static const LColor BLANK;
-	static const LColor BLACK, DARK_GREY, GREY, LIGHT_GREY, WHITE;
-	static const LColor RED, GREEN, BLUE, CYAN, MAGENTA, YELLOW;
-	static const LColor LU_BLACK, LU_RED, LU_GREEN, LU_BLUE, LU_CYAN, LU_MAGENTA, LU_YELLOW;
-	static const LColor LU_PINK, LU_CHARTR, LU_SKY, LU_PURPLE, LU_ORANGE, LU_TEAL;
+	static constexpr uint32_t G_MASK = 0x00'FF'00'00;
+	static constexpr uint32_t G_OFFSET = 8 * 2;
 
-	static const std::vector<LColor> greyscaleColors, basicColors, luColors, allColors;
+	static constexpr uint32_t B_MASK = 0x00'00'FF'00;
+	static constexpr uint32_t B_OFFSET = 8 * 1;
 
-	uchar r, g, b, a;
-	// All the constructors and static functions
-	LColor(uchar r_ = 0, uchar g_ = 0, uchar b_ = 0, uchar a_ = 255) : r(r_), g(g_), b(b_), a(a_) {}
+	static constexpr uint32_t A_MASK = 0x00'00'00'FF;
+	static constexpr uint32_t A_OFFSET = 8 * 0;
 
-	LColor(const LColor& other) = default;
+	static const LColor LU_BLACK;
 
-	static LColor randRGB(uchar alpha = 255);
-	static LColor randHSB(uchar alpha = 255);
-	static LColor fromHSB(float hue, float saturation, float brightness, uchar alpha = 255);
-	static LColor lerp(const LColor& start, const LColor& end, float time, bool doAlpha = false);
+	static const LColor LU_RED;
+	static const LColor LU_GREEN;
+	static const LColor LU_BLUE;
 
-	LColor(uint colCode)
-		: r((colCode & RED_MASK) >> RED_OFFSET),
-		  g((colCode & GREEN_MASK) >> GREEN_OFFSET),
-		  b((colCode & BLUE_MASK) >> BLUE_OFFSET),
-		  a((colCode & ALPHA_MASK) >> ALPHA_OFFSET) {}
+	static const LColor LU_YELLOW;
+	static const LColor LU_CYAN;
+	static const LColor LU_MAGENTA;
 
-	operator uint() { return uint(r << 24) | (g << 16) | (b << 8) | a; }
+	static const LColor LU_PINK;
+	static const LColor LU_CHARTR;
+	static const LColor LU_SKY;
+	static const LColor LU_PURPLE;
+	static const LColor LU_ORANGE;
+	static const LColor LU_TEAL;
 
-	// To make it compatible with other libs
-	LColor(const Color& other) : r(other.r), g(other.g), b(other.b), a(other.a) {}
+	uint8_t r;
+	uint8_t g;
+	uint8_t b;
+	uint8_t a;
 
-	operator Color() const { return (Color){.r = r, .g = g, .b = b, .a = a}; }
+	constexpr LColor() : r(0x00), g(0x00), b(0x00), a(0x00) {}
 
-	// Regular functions
-	float hue() const;
-	float saturation() const;
-	float brightness() const;
-	LColor transparent(uchar newAlpha = 255) const;
+	constexpr LColor(uint8_t r_, uint8_t g_, uint8_t b_, uint8_t a_ = 0xFF) : r(r_), g(g_), b(b_), a(a_) {}
+
+	constexpr LColor(uint32_t colCode)
+		: r((colCode & LColor::R_MASK) >> LColor::R_OFFSET),
+		  g((colCode & LColor::G_MASK) >> LColor::G_OFFSET),
+		  b((colCode & LColor::B_MASK) >> LColor::B_OFFSET),
+		  a((colCode & LColor::A_MASK) >> LColor::A_OFFSET) {}
+
+	constexpr operator uint32_t() const {
+		return ((uint32_t)(r) << LColor::R_OFFSET) | ((uint32_t)(g) << LColor::G_OFFSET) |
+			   ((uint32_t)(b) << LColor::B_OFFSET) | ((uint32_t)(a) << LColor::A_OFFSET);
+	}
+
+	// cross lib compatibility
+
+	constexpr LColor(const Color& other) : r(other.r), g(other.g), b(other.b), a(other.a) {}
+
+	constexpr operator Color() const {
+		return (Color){
+			.r = r,
+			.g = g,
+			.b = b,
+			.a = a,
+		};
+	}
+
+	// class method
+
+	// inputs must be in range 0-1 inclusive
+	static LColor FromHSB(float hue, float sat, float bri, uint8_t a = 0xFF) {
+		// WIP
+		if (hue < 0) {
+			hue = 0 + (hue - std::floor(hue));
+		} else {
+			hue -= std::floor(hue);
+		}
+		sat = std::clamp(sat, 0.0f, 1.0f);
+		bri = std::clamp(bri, 0.0f, 1.0f);
+		if (sat == 0) return LColor(bri * 0xFF, bri * 0xFF, bri * 0xFF, a);
+
+		int i = std::floor(6 * hue);
+		float f = 6 * hue - i;
+		float p = 0xFF * (bri * (1 - sat));
+		float q = 0xFF * (bri * (1 - sat * f));
+		float t = 0xFF * (bri * (1 - sat * (1 - f)));
+		bri *= 0xFF;
+
+		switch (i) {
+			case 0:
+				return LColor(bri, t, p, a);
+			case 1:
+				return LColor(q, bri, p, a);
+			case 2:
+				return LColor(p, bri, t, a);
+			case 3:
+				return LColor(p, q, bri, a);
+			case 4:
+				return LColor(t, p, bri, a);
+			case 5:
+				return LColor(bri, p, q, a);
+			default:
+				break;
+		}
+		return LColor();
+	}
+
+	static LColor RandRGB(uint8_t a = 0xFF) {
+		int64_t seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+		std::default_random_engine randEngine(seed);
+		return LColor(randEngine(), randEngine(), randEngine(), a);
+	}
+
+	static LColor RandHSB(uint8_t a = 0xFF) {
+		int64_t seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+		std::default_random_engine randEngine(seed);
+		float randHue = randEngine() / (float)std::default_random_engine::max();
+		float randSat = randEngine() / (float)std::default_random_engine::max();
+		float randBri = randEngine() / (float)std::default_random_engine::max();
+		return LColor::FromHSB(randHue, randSat, randBri, a);
+	}
+
+	static LColor Lerp(const LColor& a, const LColor& b, float tR, float tG, float tB, float tA) {
+		return LColor(std::lerp(a.r, b.r, tR), std::lerp(a.g, b.g, tG), std::lerp(a.b, b.b, tB),
+					  std::lerp(a.a, b.a, tA));
+	}
+
+	static LColor Lerp(const LColor& a, const LColor& b, float t) { return LColor::Lerp(a, b, t, t, t, t); }
+
+	LColor Fade(uint8_t a_) const { return LColor(r, g, b, a_); }
+	void ApplyFade(uint8_t a_) { a = a_; }
+
+	// operator overloading
+
+	friend std::ostream& operator<<(std::ostream& os, const LColor& col) {
+		return (os << "{ " << (uint32_t)col.r << ", " << (uint32_t)col.g << ", " << (uint32_t)col.b << ", "
+				   << (uint32_t)col.a << " }");
+	}
+
+	LColor operator+(const LColor& other) const { return LColor(r + other.r, g + other.g, b + other.b, a + other.a); }
+
+	LColor& operator+=(const LColor& other) {
+		*this = *this + other;
+		return *this;
+	}
+
+	LColor operator-(const LColor& other) const { return LColor(r - other.r, g - other.g, b - other.b, a - other.a); }
+
+	LColor& operator-=(const LColor& other) {
+		*this = *this - other;
+		return *this;
+	}
+
+	LColor operator*(const LColor& other) const { return LColor(r * other.r, g * other.g, b * other.b, a * other.a); }
+
+	LColor& operator*=(const LColor& other) {
+		*this = *this * other;
+		return *this;
+	}
+
+	LColor operator/(const LColor& other) const { return LColor(r / other.r, g / other.g, b / other.b, a / other.a); }
+
+	LColor& operator/=(const LColor& other) {
+		*this = *this / other;
+		return *this;
+	}
+
+	bool operator==(const LColor& other) const {
+		return ((r == other.r) && (g == other.g) && (b == other.b) && (a == other.a));
+	}
+
+	bool operator!=(const LColor& other) const { return !(*this == other); }
 };
-
-inline const uint LColor::RED_MASK = 0xff000000;
-inline const uint LColor::RED_OFFSET = 24;
-inline const uint LColor::GREEN_MASK = 0x00ff0000;
-inline const uint LColor::GREEN_OFFSET = 16;
-inline const uint LColor::BLUE_MASK = 0x0000ff00;
-inline const uint LColor::BLUE_OFFSET = 8;
-inline const uint LColor::ALPHA_MASK = 0x000000ff;
-inline const uint LColor::ALPHA_OFFSET = 0;
-
-inline const LColor LColor::BLANK = LColor(0x00, 0x00, 0x00, 0x00);
-
-inline const LColor LColor::BLACK = LColor(0x00, 0x00, 0x00, 0xFF);
-inline const LColor LColor::DARK_GREY = LColor(0x4B, 0x4B, 0x4B, 0xFF);
-inline const LColor LColor::GREY = LColor(0x96, 0x96, 0x96, 0xFF);
-inline const LColor LColor::LIGHT_GREY = LColor(0xC8, 0xC8, 0xC8, 0xFF);
-inline const LColor LColor::WHITE = LColor(0xFF, 0xFF, 0xFF, 0xFF);
-
-inline const LColor LColor::RED = LColor(0xFF, 0x00, 0x00, 0xFF);
-inline const LColor LColor::GREEN = LColor(0x00, 0xFF, 0x00, 0xFF);
-inline const LColor LColor::BLUE = LColor(0x00, 0x00, 0xFF, 0xFF);
-inline const LColor LColor::CYAN = LColor(0x00, 0xFF, 0xFF, 0xFF);
-inline const LColor LColor::MAGENTA = LColor(0xFF, 0x00, 0xFF, 0xFF);
-inline const LColor LColor::YELLOW = LColor(0xFF, 0xFF, 0x00, 0xFF);
 
 inline const LColor LColor::LU_BLACK = LColor(0x32, 0x32, 0x32, 0xFF);
 inline const LColor LColor::LU_RED = LColor(0xFF, 0x32, 0x32, 0xFF);
@@ -102,32 +189,5 @@ inline const LColor LColor::LU_SKY = LColor(0xAF, 0xE1, 0xFF, 0xFF);
 inline const LColor LColor::LU_PURPLE = LColor(0xE1, 0xAF, 0xFF, 0xFF);
 inline const LColor LColor::LU_ORANGE = LColor(0xFF, 0xE1, 0xAF, 0xFF);
 inline const LColor LColor::LU_TEAL = LColor(0xAF, 0xFF, 0xE1, 0xFF);
-
-inline const std::vector<LColor> LColor::greyscaleColors = {BLACK, DARK_GREY, GREY, LIGHT_GREY, WHITE};
-
-inline const std::vector<LColor> LColor::basicColors = {RED, GREEN, BLUE, CYAN, MAGENTA, YELLOW};
-
-inline const std::vector<LColor> LColor::luColors = {LU_BLACK,	 LU_RED,	LU_GREEN, LU_BLUE,	 LU_CYAN,
-													 LU_MAGENTA, LU_YELLOW, LU_PINK,  LU_CHARTR, LU_SKY,
-													 LU_PURPLE,	 LU_ORANGE, LU_TEAL};
-
-inline const std::vector<LColor> LColor::allColors = {BLACK,   DARK_GREY, GREY,	   LIGHT_GREY, WHITE,	   RED,
-													  GREEN,   BLUE,	  CYAN,	   MAGENTA,	   YELLOW,	   LU_BLACK,
-													  LU_RED,  LU_GREEN,  LU_BLUE, LU_CYAN,	   LU_MAGENTA, LU_YELLOW,
-													  LU_PINK, LU_CHARTR, LU_SKY,  LU_PURPLE,  LU_ORANGE,  LU_TEAL};
-
-std::ostream& operator<<(std::ostream& os, const LColor& info);
-
-LColor& operator+=(LColor& col, const LColor& other);
-LColor operator+(const LColor& col, const LColor& other);
-LColor& operator-=(LColor& col, const LColor& other);
-LColor operator-(const LColor& col, const LColor& other);
-LColor& operator/=(LColor& col, float scl);
-LColor operator/(const LColor& col, float scl);
-LColor& operator*=(LColor& col, float scl);
-LColor operator*(const LColor& col, float scl);
-
-bool operator==(const LColor& col, const LColor& other);
-bool operator != (const LColor& col, const LColor& other);
 
 #endif	// LCOLOR_HPP

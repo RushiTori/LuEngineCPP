@@ -1,36 +1,53 @@
 #include "SpriteSheet.hpp"
 
-SpriteSheet::SpriteSheet(const string& texPath, uint cellW_, uint cellH_) {
-	this->tex = LoadTexture(texPath.c_str());
+SpriteSheet::SpriteSheet() : tex({0}), cellWidth(0), cellHeight(0), sheetWidth(0), sheetHeight(0) {}
 
-	if (!this->tex.id) return;
-
-	this->cellW = cellW_;
-	this->cellH = cellH_;
-
-	this->sheetW = this->tex.width / this->cellW;
-	this->sheetH = this->tex.height / this->cellH;
+SpriteSheet::SpriteSheet(const std::string& filePath, uint32_t cellWidth_, uint32_t cellHeight_) : SpriteSheet() {
+	Load(filePath, cellWidth_, cellHeight_);
 }
 
-SpriteSheet::~SpriteSheet() {
-	UnloadTexture(this->tex);
-	this->tex.id = 0;
+SpriteSheet::~SpriteSheet() { Unload(); }
+
+uint32_t SpriteSheet::GetSheetWidth() const { return sheetWidth; }
+
+uint32_t SpriteSheet::GetSheetHeight() const { return sheetHeight; }
+
+void SpriteSheet::Load(const std::string& filePath, uint32_t cellWidth_, uint32_t cellHeight_) {
+	Unload();
+
+	tex = LoadTexture(filePath.c_str());
+	if (!tex.id) return;
+
+	cellWidth = cellWidth_;
+	cellHeight = cellHeight_;
+	sheetWidth = tex.width / cellWidth;
+	sheetHeight = tex.height / cellHeight;
 }
 
-const Texture2D* SpriteSheet::GetTexture() const{
-  if (!this->tex.id) return nullptr;
-  return &this->tex;
+void SpriteSheet::Unload() {
+	UnloadTexture(tex);
+	tex = {0};
+	cellWidth = 0;
+	cellHeight = 0;
+	sheetWidth = 0;
+	sheetHeight = 0;
 }
 
-void SpriteSheet::Recut(uint cellW, uint cellH) {
-	this->cellW = cellW;
-	this->cellH = cellH;
-
-	this->sheetW = this->tex.width / this->cellW;
-	this->sheetH = this->tex.height / this->cellH;
+TexView SpriteSheet::GetTexView(uint32_t tIdx, uint32_t tW, uint32_t tH) const {
+	return GetTexView(tIdx % sheetWidth, tIdx / sheetWidth, tW, tH);
 }
 
-std::optional<TexView> SpriteSheet::GetCell(uint x, uint y) const {
-	if (x >= this->sheetW || y >= this->sheetH) return {};
-	return TexView(&this->tex, this->cellW * x, this->cellH * y, this->cellW, this->cellH);
+TexView SpriteSheet::GetTexView(uint32_t tX, uint32_t tY, uint32_t tW, uint32_t tH) const {
+	TexView view = (TexView){
+		.tex = &tex,
+		.source =
+			(Rectangle){
+				.x = (float)tX * cellWidth,
+				.y = (float)tY * cellHeight,
+				.width = (float)std::min(tW * cellWidth, (uint32_t)tex.width),
+				.height = (float)std::min(tH * cellHeight, (uint32_t)tex.height),
+			},
+	};
+	if (tX > sheetWidth || tY > sheetHeight) view.tex = nullptr;
+	return view;
 }

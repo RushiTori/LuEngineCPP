@@ -4,26 +4,25 @@
 #include "TexView.hpp"
 
 class SpriteSheet {
-   private:
-	Texture2D tex = {.id = 0, .width = 0, .height = 0, .mipmaps = 0, .format = 0};
-
-	uint cellW = 0, cellH = 0;
-	uint sheetW = 0, sheetH = 0;
+   protected:
+	Texture tex;
+	uint32_t cellWidth, cellHeight;
+	uint32_t sheetWidth, sheetHeight;
 
    public:
-	SpriteSheet() = default;
-
-	SpriteSheet(const string& texPath, uint cellW_, uint cellH_);
-
+	SpriteSheet(const SpriteSheet& other) = delete;
+	SpriteSheet();
+	SpriteSheet(const std::string& filePath, uint32_t cellWidth_ = 1, uint32_t cellHeight_ = 1);
 	~SpriteSheet();
 
-	SpriteSheet(const SpriteSheet& other) = default;
+	uint32_t GetSheetWidth() const;
+	uint32_t GetSheetHeight() const;
 
-	const Texture2D* GetTexture() const;
+	void Load(const std::string& filePath, uint32_t cellWidth_ = 1, uint32_t cellHeight_ = 1);
+	void Unload();
 
-	void Recut(uint cellW, uint cellH);
-
-	std::optional<TexView> GetCell(uint x, uint y) const;
+	TexView GetTexView(uint32_t tIdx, uint32_t tW = 1, uint32_t tH = 1) const;
+	TexView GetTexView(uint32_t tX, uint32_t tY, uint32_t tW = 1, uint32_t tH = 1) const;
 };
 
 #endif	// SPRITE_SHEET_HPP

@@ -1,39 +1,26 @@
-# Makefile by S739_Lucie - January 18th 2023
+# Makefile by S739_Lucie - January 16th 2024
 # ====== Everything Command Calls related ======
 
 MAKEFLAGS += --no-print-directory
-
-USED_OS := ERROR
-CLS     := clear
-
-ifdef OS
-	USED_OS := Windows
-endif
-
-ifeq ($(shell uname), Linux)
-	USED_OS := Linux
-endif
+RM += -r
 
 # ========= Everything project related =========
 
 PROJ    := libLuEngineCPP
 TARGET  := $(PROJ).a
-DTARGET := $(PROJ)_debug.a
+COMP    := g++
+LINK    := ar -rcs
 
 STATIC_PATH := errorLib
 
-ifeq ($(USED_OS), Windows)
+ifdef OS
 	STATIC_PATH := C:/CustomLibs
-else ifeq ($(USED_OS), Linux)
+else ifeq ($(shell uname), Linux)
 	STATIC_PATH := /usr/local
 endif
 
 STATIC_LIB_PATH := $(STATIC_PATH)/lib
 STATIC_H_PATH   := $(STATIC_PATH)/include/LuEngineCPP
-
-EXT     := cpp
-COMP    := g++
-LINK    := ar -rcs
 
 # ========== Everything files related ==========
 
@@ -41,16 +28,16 @@ INC_DIR   := include
 SRC_DIR   := src
 OBJ_DIR   := objs
 
-SRC_FILES := $(wildcard $(SRC_DIR)/*.$(EXT)) $(wildcard $(SRC_DIR)/**/*.$(EXT)) 
-OBJ_FILES := $(SRC_FILES:$(SRC_DIR)/%.$(EXT)=$(OBJ_DIR)/$(USED_OS)/%.o)
-INC_FILES := $(wildcard $(INC_DIR)/*.hpp)
+HDS_FILES := $(wildcard $(INC_DIR)/*.hpp) $(wildcard $(INC_DIR)/**/*.hpp)
+SRC_FILES := $(wildcard $(SRC_DIR)/*.cpp) $(wildcard $(SRC_DIR)/**/*.cpp)
+OBJ_FILES := $(SRC_FILES:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
+DEP_FILES := $(SRC_FILES:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.d)
 
 # ========== Everything flags related ==========
 
-O_FLAGS := -O3 -std=c++20 -Wall -Wextra -Werror -Wfatal-errors -Wno-missing-field-initializers
-O_FLAGS += -I include
+O_FLAGS := -I include -O3 -std=c++20 -Wall -Wextra -Werror -Wfatal-errors -Wno-missing-field-initializers
 
-ifeq ($(USED_OS), Windows)
+ifdef OS
 	O_FLAGS += -I C:/CustomLibs/include
 endif
 
@@ -61,26 +48,13 @@ endif
 all:
 	@$(MAKE) --silent build
 
-reinstall:
-	@$(MAKE) --silent clean
-	@$(MAKE) --silent install
-
 install:
 	@$(MAKE) --silent build
-ifeq ($(USED_OS), Linux)
-	@mkdir -p $(STATIC_LIB_PATH)
-	@echo Installing $(TARGET) at /usr/local/lib/
-	@cp --update $(TARGET) $(STATIC_LIB_PATH)/$(notdir $(TARGET))
 
-	@mkdir -p $(STATIC_H_PATH)/
-	@echo Installing the headers at $(STATIC_H_PATH)/
-	@cp --update LuEngine.hpp $(STATIC_PATH)/include/LuEngine.hpp
-	@$(MAKE) --silent installHeaders
-
-else ifeq ($(USED_OS), Windows)
+ifdef OS
 	@mkdir -p $(STATIC_LIB_PATH)
 	@echo Installing $(TARGET) at C:/CustomLibs/lib/
-	@cp --update $(TARGET) $(STATIC_LIB_PATH)/$(notdir $(TARGET))
+	@cp --update $(TARGET) $(STATIC_LIB_PATH)/$(TARGET)
 
 	@mkdir -p $(STATIC_H_PATH)/
 	@echo Installing the headers at $(STATIC_H_PATH)/
@@ -88,14 +62,23 @@ else ifeq ($(USED_OS), Windows)
 	@cp --update LuEngine.hpp $(STATIC_PATH)/include/LuEngine.hpp
 	@$(MAKE) --silent installHeaders
 
+else ifeq ($(shell uname), Linux)
+	@mkdir -p $(STATIC_LIB_PATH)
+	@echo Installing $(TARGET) at /usr/local/lib/
+	@cp --update $(TARGET) $(STATIC_LIB_PATH)/$(TARGET)
+
+	@mkdir -p $(STATIC_H_PATH)/
+	@echo Installing the headers at $(STATIC_H_PATH)/
+	@cp --update LuEngine.hpp $(STATIC_PATH)/include/LuEngine.hpp
+	@$(MAKE) --silent installHeaders
+
 else
 	@echo Can't automatically install this lib on your system
 endif
 
-
-installHeaders: $(patsubst $(INC_DIR)/%, $(STATIC_H_PATH)/%, $(INC_FILES))
+installHeaders: $(HDS_FILES:$(INC_DIR)/%.hpp=$(STATIC_H_PATH)/%.hpp)
 $(STATIC_H_PATH)/%.hpp: $(INC_DIR)/%.hpp
-	@echo installing $(patsubst %.o, %,$(notdir $@))
+	@echo installing $(notdir $(basename $@))
 	@cp --update $< $@
 
 libHeader: 
@@ -113,59 +96,68 @@ build: $(TARGET)
 
 $(TARGET): $(OBJ_FILES)
 	@echo Linking the static library
-	@$(LINK) $@ $^ 
-
-# Debug Build
-
-debug: $(DTARGET)
-
-$(DTARGET) : $(OBJ_FILES)
-	@echo Linking the static library
-	@$(LINK) $@ $^ 
+	@$(LINK) $@ $^
 
 # Obj and Header files compiling
 
 objects: $(OBJ_FILES)
-$(OBJ_DIR)/$(USED_OS)/%.o: $(SRC_DIR)/%.$(EXT)
-	@echo Compiling $(patsubst %.o, %,$(notdir $@))
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	@echo Compiling $(notdir $(basename $@))
+	@mkdir -p $(dir $@)
 	@$(COMP) -c $< -o $@ $(O_FLAGS)
-
 
 # File Cleaners
 
-clean:
-	$(RM) $(OBJ_DIR)/$(USED_OS)/*.o
-	$(RM) $(OBJ_DIR)/$(USED_OS)/**/*.o
+cleanAll:
+	@$(MAKE) clean
 	$(RM) $(PROJ).a
 	$(RM) $(PROJ).lib
 	$(RM) $(PROJ)_debug.a
 	$(RM) $(PROJ)_debug.lib
-	$(RM) LuEngine.h
+	$(RM) LuEngine.hpp
 	$(CLS)
+
+clean: 
+	$(RM) $(OBJ_DIR)
+
+cleanInstall:
+	$(RM) $(STATIC_LIB_PATH)/$(TARGET)
+	$(RM) $(STATIC_H_PATH)
+	$(RM) $(STATIC_PATH)/include/LuEngine.hpp
 
 # Makefile Debugging/Usefull Functions
 
-subDir:
-	mkdir -p $(sort $(dir $(OBJ_FILES)))
-	touch -f $(addsuffix DO_NOT_REMOVE,$(sort $(dir $(OBJ_FILES))))
-
 rebuild:
-	@$(MAKE) --silent clean
+	@$(MAKE) --silent cleanAll
 	@$(MAKE) --silent build
+
+reinstall:
+	@$(MAKE) --silent cleanAll
+	@$(MAKE) --silent cleanInstall
+	@$(MAKE) --silent install
 
 # Makefile Debugging/Usefull Functions
 showOS: 
-	@echo $(USED_OS)
+ifdef OS
+	@echo Windows
+else ifeq ($(shell uname), Linux)
+	@echo Linux
+else
+	@echo ERROR
+endif
 
 showFiles:
+	@echo Header files
+	@echo $(HDS_FILES)
+	@echo 
 	@echo Source files
 	@echo $(SRC_FILES)
 	@echo 
 	@echo Object files
 	@echo $(OBJ_FILES)
 	@echo 
-	@echo Header files
-	@echo $(INC_FILES)
+	@echo Dep files
+	@echo $(DEP_FILES)
 	@echo 
 	@echo Install paths
 	@echo "lib path     :" $(STATIC_LIB_PATH)

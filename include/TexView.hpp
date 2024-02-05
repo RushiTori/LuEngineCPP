@@ -4,45 +4,31 @@
 #include "EngineUtils.hpp"
 
 struct TexView {
-	const Texture2D* tex = nullptr;
-	LVector uvCenter = LVector(0.5f, 0.5f);
-	LVector uvSizes = LVector(1, 1);
+	const Texture* tex = nullptr;
+	Rectangle source = (Rectangle){
+		.x = 0.0f,
+		.y = 0.0f,
+		.width = 0.0f,
+		.height = 0.0f,
+	};
 
-	TexView() = default;
-	TexView(const Texture2D* tex_, uint pixelX, uint pixelY, uint pixelWidth, uint pixelHeight);
-	TexView(const Texture2D* tex_, const LVector& texPos, const LVector& texSizes);
-	// TexView(const TexView& other) : tex(other.tex), uvCenter(other.uvCenter), uvSizes(other.uvSizes) {}
+	bool IsBlank() const;
 
-	Rectangle GetUVRec() const;
-	LVector GetPixelPos() const;
-	LVector GetPixelSizes() const;
-	Rectangle GetPixelRec() const;
+	void Display(const LVector& pos, const LColor& tint = WHITE) const;
 
-	void DisplayRect(float x, float y, float w, float h, float shapeAngle = 0.0f, float uvAngle = 0.0f,
-					 LColor tint = LColor::WHITE) const;
-	void DisplayRect(const LVector& pos, float w, float h, float shapeAngle = 0.0f, float uvAngle = 0.0f,
-					 LColor tint = LColor::WHITE) const;
-	void DisplayRect(const LVector& pos, const LVector& sizes, float shapeAngle = 0.0f, float uvAngle = 0.0f,
-					 LColor tint = LColor::WHITE) const;
-	void DisplayRect(const Rectangle& rec, float shapeAngle = 0.0f, float uvAngle = 0.0f,
-					 LColor tint = LColor::WHITE) const;
+	void Display(const LVector& pos, float scaleX, float scaleY, const LColor& tint = WHITE) const;
+	void Display(const LVector& pos, const LVector& scales, const LColor& tint = WHITE) const;
 
-	void DisplayCircle(float x, float y, float r, float shapeAngle = 0.0f, float uvAngle = 0.0f,
-					   LColor tint = LColor::WHITE, uint pCount = 32U) const;
-	void DisplayCircle(const LVector& pos, float r, float shapeAngle = 0.0f, float uvAngle = 0.0f,
-					   LColor tint = LColor::WHITE, uint pCount = 32U) const;
+	void Display(const LVector& pos, float rotation, const LVector& origin = LVector(),
+				 const LColor& tint = WHITE) const;
+	void Display(const LVector& pos, float rotation, float scaleX, float scaleY, const LVector& origin = LVector(),
+				 const LColor& tint = WHITE) const;
+	void Display(const LVector& pos, float rotation, const LVector& scales, const LVector& origin = LVector(),
+				 const LColor& tint = WHITE) const;
 
-	void DisplayTriangle(const LVector& pA, const LVector& pB, const LVector& pC, float shapeAngle = 0.0f,
-						 float uvAngle = 0.0f, LColor tint = LColor::WHITE) const;
-
-	void DisplayPoly(const LVector& center, float r, uint pCount, float shapeAngle = 0.0f, float uvAngle = 0.0f,
-					 LColor tint = LColor::WHITE) const;
-
-	void DisplayPoly(const std::vector<LVector>& points, float shapeAngle = 0.0f, float uvAngle = 0.0f,
-					 LColor tint = LColor::WHITE) const;
-
-	void Display(const std::vector<LVector>& points, const std::vector<LVector>& uv, float shapeAngle = 0.0f,
-				 float uvAngle = 0.0f, LColor tint = LColor::WHITE) const;
+	void Display(const Rectangle& dest, const LColor& tint = WHITE) const;
+	void Display(const Rectangle& dest, float rotation, const LVector& origin = LVector(),
+				 const LColor& tint = WHITE) const;
 };
 
 #endif	// TEX_VIEW_HPP
